@@ -10,21 +10,13 @@
 
 @implementation BuddleView
 
-@synthesize offsetPoint;
 @synthesize buddleString;
 
 -(void)drawRect:(CGRect)rect
 {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    CGContextSetRGBFillColor(context, 0.0f,0.0f,0.0f,0.2f);
-    CGContextMoveToPoint(context, self.offsetPoint.x, self.offsetPoint.y);
-    CGContextFillRect(context, rect);
+    [((CHartView *)[self superview]) drawBuddleView:rect withString:self.buddleString];
 }
 
-@end
-
-@interface CHartView :UIView
 @end
 
 @implementation CHartView
@@ -32,6 +24,20 @@
 -(void)drawRect:(CGRect)rect
 {
     [((FRChartScrollView *)[self superview]) drawChartView:rect];
+}
+
+-(void)drawBuddleView:(CGRect)r withString:(NSString *)theString
+{
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetFillColorWithColor(context, [UIColor orangeColor].CGColor);
+    CGContextFillRect(context, r);
+    
+    [[UIColor whiteColor] set];
+    [theString drawAtPoint:CGPointMake(r.origin.x+8, r.origin.y+8) 
+                  forWidth:r.size.width-16
+                  withFont:[UIFont systemFontOfSize:14]
+             lineBreakMode:UILineBreakModeWordWrap];
 }
 
 @end
@@ -67,13 +73,16 @@
     }
     
     NSInteger buddleIndex = (int)(tapPoint.x/cellWidth);
-    BuddleView *buddleView = [[BuddleView alloc]initWithFrame:CGRectMake(buddleIndex*cellWidth+10, 
-                                                                         [self getPoint:buddleIndex].y-60,
-                                                                         cellWidth-20,
-                                                                         50)];
-    buddleView.offsetPoint = CGPointMake([self getPoint:buddleIndex].x,
-                                         [self getPoint:buddleIndex].y - 10);
-    buddleView.buddleString = [self.objectsArray objectAtIndex:buddleIndex];
+    NSString *theBuddleString = [self.objectsArray objectAtIndex:buddleIndex];
+    CGSize stringSize = [theBuddleString sizeWithFont:[UIFont systemFontOfSize:14] 
+                       constrainedToSize:CGSizeMake(self.frame.size.width/2, 999.0) 
+                           lineBreakMode:UILineBreakModeWordWrap];
+    CGSize buddleSize = CGSizeMake(stringSize.width+8*2, stringSize.height+8*2);
+    BuddleView *buddleView = [[BuddleView alloc]initWithFrame:CGRectMake([self getPoint:buddleIndex].x+cellWidth/2-buddleSize.width/2, 
+                                                                         [self getPoint:buddleIndex].y-buddleSize.height-5,
+                                                                         buddleSize.width,
+                                                                         buddleSize.height)];
+    buddleView.buddleString = theBuddleString;
     buddleView.alpha = 0;
     [chartView addSubview:buddleView];
     [UIView animateWithDuration:0.4
@@ -83,30 +92,25 @@
                      completion:nil];
 }
 
--(void)setup
-{
-    self.showsVerticalScrollIndicator = NO;
-    self.showsHorizontalScrollIndicator = NO;
-    self.opaque = YES;
-    self.backgroundColor = [UIColor clearColor];
-    
-    self.minData = 0;
-    self.maxData = 10;
-    self.cellWidth = 320.0f/6.5f;
-    self.topSpace = 1;
-    self.buttomSpace = 1;
-    isToFill = YES;
-    
-//    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
-//    [self addGestureRecognizer:tap];
-//    [tap release];
-}
-
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        [self setup];
+        self.showsVerticalScrollIndicator = NO;
+        self.showsHorizontalScrollIndicator = NO;
+        self.opaque = YES;
+        self.backgroundColor = [UIColor clearColor];
+        
+        self.minData = 0;
+        self.maxData = 10;
+        self.cellWidth = 320.0f/6.5f;
+        self.topSpace = 1;
+        self.buttomSpace = 1;
+        isToFill = YES;
+        
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
+        [self addGestureRecognizer:tap];
+        [tap release];
     }
     return self;
 }

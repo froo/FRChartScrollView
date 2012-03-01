@@ -10,12 +10,16 @@
 
 @interface BuddleView : UIView
 {
-    CGPoint offsetPoint;
     NSString *buddleString;
 }
 
-@property (nonatomic, assign) CGPoint offsetPoint;
 @property (nonatomic, retain) NSString *buddleString;
+
+@end
+
+@interface CHartView : UIView
+
+-(void)drawBuddleView:(CGRect)r withString:(NSString *)theString;
 
 @end
 
@@ -42,5 +46,6 @@
 @property (nonatomic, assign) BOOL isToFill;
 
 -(void)drawChartView:(CGRect)r;
+
 
 @end
