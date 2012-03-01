@@ -1,9 +1,7 @@
 ##Example
 
-![](demo.png)
+![](http://pic.yupoo.com/froo/BMAok240/medish.jpg)
 
 ##To do
 
 It's still some dirty codes yet. Lots of things to improve ;)
-
-* Touch to show information buddle.
