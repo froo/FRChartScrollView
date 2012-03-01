@@ -8,12 +8,27 @@
 
 #import <UIKit/UIKit.h>
 
+@interface BuddleView : UIView
+{
+    CGPoint offsetPoint;
+    NSString *buddleString;
+}
+
+@property (nonatomic, assign) CGPoint offsetPoint;
+@property (nonatomic, retain) NSString *buddleString;
+
+@end
+
 @interface FRChartScrollView : UIScrollView
 {
     CGFloat minData;
     CGFloat maxData;
     CGFloat cellWidth;
+    CGFloat topSpace;
+    CGFloat buttomSpace;
     NSMutableArray *objectsArray;
+    
+    BOOL isToFill;
     
     UIView *chartView;
 }
@@ -22,6 +37,9 @@
 @property (nonatomic, assign) CGFloat minData;
 @property (nonatomic, assign) CGFloat maxData;
 @property (nonatomic, assign) CGFloat cellWidth;
+@property (nonatomic, assign) CGFloat topSpace;
+@property (nonatomic, assign) CGFloat buttomSpace;
+@property (nonatomic, assign) BOOL isToFill;
 
 -(void)drawChartView:(CGRect)r;
 
