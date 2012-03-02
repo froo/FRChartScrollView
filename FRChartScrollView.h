@@ -14,13 +14,9 @@
 }
 
 @property (nonatomic, retain) NSString *buddleString;
-
 @end
 
-@interface CHartView : UIView
-
--(void)drawBuddleView:(CGRect)r withString:(NSString *)theString;
-
+@interface ChartView : UIView
 @end
 
 @interface FRChartScrollView : UIScrollView

@@ -14,30 +14,25 @@
 
 -(void)drawRect:(CGRect)rect
 {
-    [((CHartView *)[self superview]) drawBuddleView:rect withString:self.buddleString];
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    CGContextSetFillColorWithColor(context, [UIColor orangeColor].CGColor);
+    CGContextFillRect(context, rect);
+    
+    [[UIColor whiteColor] set];
+    [self.buddleString drawAtPoint:CGPointMake(rect.origin.x+8, rect.origin.y+8) 
+                  forWidth:rect.size.width-16
+                  withFont:[UIFont systemFontOfSize:14]
+             lineBreakMode:UILineBreakModeWordWrap];
 }
 
 @end
 
-@implementation CHartView
+@implementation ChartView
 
 -(void)drawRect:(CGRect)rect
 {
     [((FRChartScrollView *)[self superview]) drawChartView:rect];
-}
-
--(void)drawBuddleView:(CGRect)r withString:(NSString *)theString
-{
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    CGContextSetFillColorWithColor(context, [UIColor orangeColor].CGColor);
-    CGContextFillRect(context, r);
-    
-    [[UIColor whiteColor] set];
-    [theString drawAtPoint:CGPointMake(r.origin.x+8, r.origin.y+8) 
-                  forWidth:r.size.width-16
-                  withFont:[UIFont systemFontOfSize:14]
-             lineBreakMode:UILineBreakModeWordWrap];
 }
 
 @end
@@ -119,7 +114,7 @@
 {
     self.contentSize = CGSizeMake(cellWidth*self.objectsArray.count, self.frame.size.height);
     
-    chartView = [[CHartView alloc]initWithFrame:CGRectMake(0, 0, self.contentSize.width, self.contentSize.height)];
+    chartView = [[ChartView alloc]initWithFrame:CGRectMake(0, 0, self.contentSize.width, self.contentSize.height)];
     [self addSubview:chartView];
 }
 
@@ -136,12 +131,23 @@
         CGContextAddRect(c, CGRectMake(i*cellWidth, 0, cellWidth, self.frame.size.height));
         CGContextFillPath(c);
         
-        UIImage *dataDotImg = [UIImage imageNamed:@"data_point.png"];
-        [dataDotImg drawAtPoint:CGPointMake([self getPoint:i].x+(cellWidth-dataDotImg.size.width)/2,
-                                            [self getPoint:i].y)];
+        CGContextSetRGBStrokeColor(c, 0.02f, 0.57f, 0.81f, 1.0f);
+        CGContextSetLineWidth(c, 2);
+        CGContextAddEllipseInRect(c, CGRectMake([self getPoint:i].x+(cellWidth-12)/2,
+                                                [self getPoint:i].y,
+                                                12,
+                                                12));
+        CGContextStrokePath(c);
         
-        thePoints[i] = CGPointMake([self getPoint:i].x+(cellWidth-dataDotImg.size.width)/2+dataDotImg.size.width/2,
-                                   [self getPoint:i].y+dataDotImg.size.height/2);
+        CGContextSetRGBFillColor(c, 0.02f, 0.57f, 0.81f, 1.0f);
+        CGContextAddEllipseInRect(c, CGRectMake([self getPoint:i].x+(cellWidth-8)/2,
+                                                [self getPoint:i].y+2,
+                                                8,
+                                                8));
+        CGContextFillPath(c);
+        
+        thePoints[i] = CGPointMake([self getPoint:i].x+(cellWidth-12)/2+12/2,
+                                   [self getPoint:i].y+12/2);
     }
     
     CGContextSetRGBStrokeColor(c, 0.02f, 0.57f, 0.81f, 1.0f);
