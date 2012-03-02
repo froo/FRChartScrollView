@@ -22,7 +22,7 @@
     [[UIColor whiteColor] set];
     [self.buddleString drawAtPoint:CGPointMake(rect.origin.x+8, rect.origin.y+8) 
                   forWidth:rect.size.width-16
-                  withFont:[UIFont systemFontOfSize:14]
+                  withFont:[UIFont boldSystemFontOfSize:16]
              lineBreakMode:UILineBreakModeWordWrap];
 }
 
@@ -50,7 +50,7 @@
 -(CGPoint)getPoint:(NSInteger )index
 {
     return CGPointMake(index*cellWidth,
-                       (self.frame.size.height - topSpace - buttomSpace) * (1.0f - [(NSString *)[self.objectsArray objectAtIndex:index] floatValue]/(self.maxData - self.minData)));
+                       (self.frame.size.height - topSpace - buttomSpace) * (1.0f - ([(NSString *)[self.objectsArray objectAtIndex:index] floatValue] - minData)/(maxData - minData)));
 }
 
 -(void)handleTap:(UITapGestureRecognizer *)tapGesture
@@ -68,23 +68,25 @@
     }
     
     NSInteger buddleIndex = (int)(tapPoint.x/cellWidth);
-    NSString *theBuddleString = [self.objectsArray objectAtIndex:buddleIndex];
-    CGSize stringSize = [theBuddleString sizeWithFont:[UIFont systemFontOfSize:14] 
-                       constrainedToSize:CGSizeMake(self.frame.size.width/2, 999.0) 
-                           lineBreakMode:UILineBreakModeWordWrap];
-    CGSize buddleSize = CGSizeMake(stringSize.width+8*2, stringSize.height+8*2);
-    BuddleView *buddleView = [[BuddleView alloc]initWithFrame:CGRectMake([self getPoint:buddleIndex].x+cellWidth/2-buddleSize.width/2, 
-                                                                         [self getPoint:buddleIndex].y-buddleSize.height-5,
-                                                                         buddleSize.width,
-                                                                         buddleSize.height)];
-    buddleView.buddleString = theBuddleString;
-    buddleView.alpha = 0;
-    [chartView addSubview:buddleView];
-    [UIView animateWithDuration:0.4
-                     animations:^{
-                         buddleView.alpha = 1;
-                     } 
-                     completion:nil];
+    if (buddleIndex <= self.objectsArray.count -1) {
+        NSString *theBuddleString = [self.objectsArray objectAtIndex:buddleIndex];
+        CGSize stringSize = [theBuddleString sizeWithFont:[UIFont boldSystemFontOfSize:16]
+                                        constrainedToSize:CGSizeMake(self.frame.size.width/2, 999.0) 
+                                            lineBreakMode:UILineBreakModeWordWrap];
+        CGSize buddleSize = CGSizeMake(stringSize.width+8*2, stringSize.height+8*2);
+        BuddleView *buddleView = [[BuddleView alloc]initWithFrame:CGRectMake([self getPoint:buddleIndex].x+cellWidth/2-buddleSize.width/2, 
+                                                                             [self getPoint:buddleIndex].y-buddleSize.height-5,
+                                                                             buddleSize.width,
+                                                                             buddleSize.height)];
+        buddleView.buddleString = theBuddleString;
+        buddleView.alpha = 0;
+        [chartView addSubview:buddleView];
+        [UIView animateWithDuration:0.4
+                         animations:^{
+                             buddleView.alpha = 1;
+                         } 
+                         completion:nil];
+    }
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -96,11 +98,11 @@
         self.opaque = YES;
         self.backgroundColor = [UIColor clearColor];
         
-        self.minData = 0;
-        self.maxData = 10;
-        self.cellWidth = 320.0f/6.5f;
-        self.topSpace = 1;
-        self.buttomSpace = 1;
+        minData = 0;
+        maxData = 10;
+        cellWidth = 320.0f/6.5f;
+        topSpace = 1;
+        buttomSpace = 1;
         isToFill = YES;
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleTap:)];
@@ -116,6 +118,10 @@
     
     chartView = [[ChartView alloc]initWithFrame:CGRectMake(0, 0, self.contentSize.width, self.contentSize.height)];
     [self addSubview:chartView];
+    
+    if (self.objectsArray.count > 7) {
+        [self setContentOffset:CGPointMake(self.contentSize.width-320, self.contentOffset.y) animated:NO];
+    }
 }
 
 -(void)drawChartView:(CGRect)r
@@ -155,13 +161,14 @@
     CGContextSetLineWidth(c, 2.0f);
     
     CGMutablePathRef pathRef = CGPathCreateMutable();
-    CGPathMoveToPoint(pathRef, NULL, 0, thePoints[0].y);
-    CGPathAddLineToPoint(pathRef, NULL, thePoints[0].x,thePoints[0].y);
     CGPathAddLines(pathRef, NULL, thePoints, theCount);
-    CGPathAddLineToPoint(pathRef, NULL, self.contentSize.width+1,thePoints[self.objectsArray.count-1].y);
-    CGPathAddLineToPoint(pathRef, NULL, self.contentSize.width+1,self.contentSize.height+1);
-    CGPathAddLineToPoint(pathRef, NULL, -1,self.contentSize.height+1);
-    CGPathAddLineToPoint(pathRef, NULL, -1,thePoints[0].y);
+    if (theCount > 1) {
+        CGPathAddLineToPoint(pathRef, NULL, self.contentSize.width+1,thePoints[self.objectsArray.count-1].y);
+        CGPathAddLineToPoint(pathRef, NULL, self.contentSize.width+1,self.contentSize.height+1);
+        CGPathAddLineToPoint(pathRef, NULL, -1,self.contentSize.height+1);
+        CGPathAddLineToPoint(pathRef, NULL, -1,thePoints[0].y);
+        CGPathAddLineToPoint(pathRef, NULL, thePoints[0].x,thePoints[0].y);
+    }
 
     CGContextAddPath(c, pathRef);
     CGContextStrokePath(c);
